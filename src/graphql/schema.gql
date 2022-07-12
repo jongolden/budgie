@@ -1,0 +1,161 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+interface Node {
+  id: String!
+}
+
+interface Edge {
+  cursor: String!
+  node: Node!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+}
+
+type Transaction implements Node {
+  id: String!
+  date: DateTime!
+  payee: String!
+  category: String!
+  amount: Float!
+  cleared: Boolean!
+  account: Account!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type AccountTransactionsConnection implements Connection {
+  edges: [AccountTransactionEdge!]!
+  totalCount: Int!
+  pageInfo: PageInfo!
+  totalInflow: Float!
+  totalOutflow: Float!
+}
+
+interface Connection {
+  edges: [Edge!]!
+  totalCount: Int!
+  pageInfo: PageInfo!
+}
+
+type Account implements Node {
+  id: String!
+  name: String!
+  type: AccountType!
+  balance: Float!
+  transactions: AccountTransactionsConnection!
+}
+
+enum AccountType {
+  Checking
+  Savings
+  Cash
+  CreditCard
+  LineOfCredit
+  Mortgage
+  AutoLoan
+  StudentLoan
+  PersonalLoan
+  MedicalDebt
+  OtherDebt
+  Asset
+  Liability
+}
+
+type AccountEdge implements Edge {
+  cursor: String!
+  node: Account!
+}
+
+type AccountsConnection implements Connection {
+  edges: [AccountEdge!]!
+  totalCount: Int!
+  pageInfo: PageInfo!
+  totalBalance: Float!
+}
+
+type AccountTransactionEdge implements Edge {
+  cursor: String!
+  node: Transaction!
+}
+
+type Query {
+  account(id: String!): Account!
+  accounts: AccountsConnection!
+}
+
+type Mutation {
+  addAccount(input: AddAccountInput!): AddAccountResponse!
+  addTransaction(input: AddTransactionInput!): AddTransactionResponse!
+  clearTransaction(input: ClearTransactionInput!): ClearTransactionResponse!
+}
+
+union AddAccountResponse = AddAccountSuccess | AccountExistsError
+
+type AddAccountSuccess {
+  message: String!
+}
+
+type AccountExistsError implements Error {
+  message: String!
+}
+
+interface Error {
+  message: String!
+}
+
+input AddAccountInput {
+  name: String!
+  type: AccountType!
+  balance: Float!
+}
+
+union AddTransactionResponse = AddTransactionSuccess | AccountDoesNotExistError | InternalError
+
+type AddTransactionSuccess {
+  message: String!
+}
+
+type AccountDoesNotExistError implements Error {
+  message: String!
+  accountId: String!
+}
+
+type InternalError implements Error {
+  message: String!
+}
+
+input AddTransactionInput {
+  accountId: String!
+  payee: String!
+  category: String!
+  amount: Float!
+  transactionDate: DateTime!
+}
+
+union ClearTransactionResponse = ClearTransactionSuccess | TransactionNotFound | AccountNotFound | InternalError
+
+type ClearTransactionSuccess {
+  message: String!
+}
+
+type TransactionNotFound {
+  message: String!
+  transactionId: String!
+}
+
+type AccountNotFound implements Error {
+  message: String!
+  accountId: String!
+}
+
+input ClearTransactionInput {
+  accountId: String!
+  transactionId: String!
+}
